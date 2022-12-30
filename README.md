@@ -2,17 +2,21 @@
 
 A directory-based adaptetion of flask. _Yeah, I got pretty creative with the name_
 
-This is not intended for production, it's just a proof-of-concept. You can use [poetry](https://python-poetry.org/) to run the project.
+This is not intended for production, it's just a proof-of-concept. You can use [poetry](https://python-poetry.org/) to run the project. First, install the dependecies with:
+
+```sh
+poetry install
+```
 
 #### Development
 
-```py
+```sh
 poetry run dev
 ```
 
 #### Production
 
-```py
+```sh
 poetry run serve
 ```
 
