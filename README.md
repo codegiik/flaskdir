@@ -1,6 +1,6 @@
 # flaskdir
 
-A flask directory-based microframework. _Yeah, I got pretty creative with the name_
+A directory-based adaptetion of flask. _Yeah, I got pretty creative with the name_
 
 This is not intended for production, it's just a proof-of-concept. You can use [poetry](https://python-poetry.org/) to run the project.
 
