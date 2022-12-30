@@ -1,0 +1,20 @@
+[tool.poetry]
+name = "appname"
+version = "0.1.0"
+description = "A simple dir-based adaptation of flask"
+authors = ["pasc4le"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+importlib = "^1.0.4"
+Flask = "^2.2.2"
+waitress = "^2.1.2"
+
+[tool.poetry.scripts]
+dev = "appname:dev"
+serve = "appname:prod"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
