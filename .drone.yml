@@ -1,0 +1,14 @@
+kind: pipeline
+name: default
+
+steps:
+  - name: docker
+    image: plugins/docker
+    settings:
+      registry: registry.gitlab.com
+      username:
+        from_secret: docker_registry_username
+      password:
+        from_secret: docker_registry_password
+      repo: registry.gitlab.com/codegiik/flaskdir
+      auto_tag: true
