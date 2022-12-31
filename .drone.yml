@@ -2,6 +2,12 @@ kind: pipeline
 name: default
 
 steps:
+  - name: test 
+    image: python:3.10-slim 
+    commands:
+      - pip3 install poetry
+      - poetry install
+      - poetry run pytest
   - name: docker
     image: plugins/docker
     settings:
