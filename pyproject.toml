@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "appname"
-version = "0.1.0"
+version = "0.1.1"
 description = "A simple dir-based adaptation of flask"
 authors = ["pasc4le"]
 readme = "README.md"
