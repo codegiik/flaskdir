@@ -95,13 +95,13 @@ def add_routes_to_app():
         print('with Methods', rule.methods)
 
 
-def dev():
+def dev(host = '0.0.0.0', port = 8000):
     add_routes_to_app()
-    app.run(port=8000, debug=True, use_reloader=False)
+    app.run(host=host, port=port, debug=True, use_reloader=False)
 
-def prod():
+def prod(host = '0.0.0.0', port = 8000):
     add_routes_to_app()
-    serve(app, host='0.0.0.0', port=8000)
+    serve(app, host=host, port=port)
 
 if __name__ == '__main__':
     prod()
