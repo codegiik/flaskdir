@@ -1,4 +1,5 @@
 from flask import Flask
+from flask.typing import ResponseReturnValue, ResponseValue, RouteCallable
 from waitress import serve
 import importlib.util
 import os
@@ -11,41 +12,72 @@ METHOD_NAMES = ['get', 'post', 'put', 'delete', 'patch', 'options', 'head']
 
 app = Flask(__name__, static_folder=STATIC_DIR)
 
-def list_routes(startpath):
-    routes = []
-
-    for root, _, files in os.walk(startpath):
-        if 'index.py' in files:
-            uri = root
-            if not uri.endswith('/'):
-                uri += '/'
-
-            routes.append(uri)
-
-    return routes
-
 def route_to_uri(route):
     return route.replace(ROUTES_DIR, '')
 
 def route_to_name(route):
     return re.sub(r'>?/<?', '_', route_to_uri(route))
 
-def route_to_mod_name(route):
-    return 'routes' + route_to_name(route).replace('_', '.') + 'index'
+def route_to_mod_name(route, type = 'index'):
+    return 'routes' + route_to_name(route).replace('_', '.') + type
 
-def route_to_index(route):
-    return os.path.join(route, 'index.py')
+def route_to_index(route, file = 'index.py'):
+    return os.path.join(route, file)
+
+def route_to_mod(route, type = 'index'):
+    index_file = route_to_index(route, type + '.py')
+    spec = importlib.util.spec_from_file_location(route_to_mod_name(route, type), index_file)
+
+    if spec is None or spec.loader is None:
+        print('No spec found for {}'.format(index_file))
+        return None 
+
+    mod = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(mod)
+    
+    return mod
+
+def mods_to_handlers(mods):
+    handlers = []
+
+    for mod in mods:
+        if mod is not None and hasattr(mod, 'handler'):
+            handlers.append(mod.handler)
+
+    return handlers
+
+def get_routes(startpath, type = 'index'):
+    routes = dict()
+
+    for root, _, files in os.walk(startpath):
+        if type + '.py' in files:
+            uri = root
+            if not uri.endswith('/'):
+                uri += '/'
+
+            routes[uri] = route_to_mod(uri, type)
+
+    return routes
+
+def generate_handler(*args) -> RouteCallable:
+    def _handler(**kwargs) -> ResponseReturnValue:
+        for handler in args:
+            return_value = handler(**kwargs)
+
+            if return_value is not None:
+                return return_value
+
+        return "Internal Server Error", 500
+
+    return _handler
+
 
 def add_routes_to_app():
-    for route in list_routes(ROUTES_DIR):
-        spec = importlib.util.spec_from_file_location(route_to_mod_name(route), route_to_index(route))
+    middlewares = get_routes(ROUTES_DIR, 'middleware')
+    routes = get_routes(ROUTES_DIR)
 
-        if spec is None or spec.loader is None:
-            print('No spec found for {}'.format(route_to_index(route)))
-            continue
-
-        mod = importlib.util.module_from_spec(spec)
-        spec.loader.exec_module(mod)
+    for route, mod in routes.items():
+        filtered_middlewares = dict(filter(lambda item: route.startswith(item[0]), middlewares.items()))
 
         for method_name in METHOD_NAMES:
             method = getattr(mod, method_name, None)
@@ -53,7 +85,10 @@ def add_routes_to_app():
             if method is None:
                 continue
 
-            app.add_url_rule(route_to_uri(route), route_to_name(route), method, methods=[method_name.upper()])
+            handler = generate_handler(*mods_to_handlers(filtered_middlewares.values()), method)
+
+            app.add_url_rule(route_to_uri(route), route_to_name(route), handler, methods=[method_name.upper()])
+
 
     for rule in app.url_map.iter_rules():
         print('Found route:', rule, end=' -> ')
