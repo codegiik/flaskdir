@@ -1,11 +1,11 @@
 from flask import Flask
-from flask.typing import ResponseReturnValue, ResponseValue, RouteCallable
+from flask.typing import ResponseReturnValue, RouteCallable
 from waitress import serve
 import importlib.util
 import os
 import re
 
-PROJECT_DIR = os.path.abspath(os.path.join(os.path.dirname(os.path.abspath(__file__)), '..'))
+PROJECT_DIR = os.path.abspath(os.path.dirname(__file__))
 STATIC_DIR = os.path.join(PROJECT_DIR, 'static')
 ROUTES_DIR = os.path.join(PROJECT_DIR, 'routes')
 METHOD_NAMES = ['get', 'post', 'put', 'delete', 'patch', 'options', 'head']
@@ -104,4 +104,4 @@ def prod():
     serve(app, host='0.0.0.0', port=8000)
 
 if __name__ == '__main__':
-    dev()
+    prod()
