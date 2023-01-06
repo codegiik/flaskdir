@@ -5,21 +5,15 @@ import sys
 
 sys.path.append('../flaskdir')
 
-import appname
+import appname as flask_main
 import appname.routes.name.middleware as name_middleware
-
-DEFAULT_HOST = '0.0.0.0'
-DEFAULT_PORT = 8888
-DEFAULT_URL = 'http://{}:{}'.format(DEFAULT_HOST, DEFAULT_PORT)
 
 fake = Faker()
 
-generate_url = lambda x: '{}/{}'.format(DEFAULT_URL, x)
-
 @pytest.fixture(scope='session')
 def flask_app():
-    appname.add_routes_to_app()
-    return appname.app.test_client()
+    flask_main.add_routes_to_app()
+    return flask_main.app.test_client()
 
 def test_hello_world(flask_app):
     res = flask_app.get('/')
